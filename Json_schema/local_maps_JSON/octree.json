@@ -1,0 +1,144 @@
+{
+    "$id": "https://github.com/effelam/JSON_3dMaps/blob/master/local_maps_JSON/octree.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "octree",    
+    "description": "Implementation of the local map type octree. An octree represents the space with an octree, that is a tree. Each node of this tree that is not a leaf has exactly 8 children. Each node (including leaves) has the characteristics listed in the corresponding field.",
+    "type": "object",
+    
+    "properties":{
+        "localmap_id": {"type": "string"},
+        "time": {"description": "Time of creation of the map.", "type": "string", "format": "date-time"},
+        "map_description": {"type": "string"},
+        "coordinate_system": {"type": "string", "enum": ["absolute", "relative"]},
+        "absolute_pose": {"description": "Geo-referenced location of the local map. Required if coordinate_system is absolute, not required if coordinate_system is relative."},
+
+        "size": {
+            "description": "Size of the space represented by the map, expressed in meters along the x, y, and z axes.",
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+
+        "max_depth": {
+            "description": "Maximum number of levels of the tree, which defines the smallest portion of space that can be represented by the tree.",
+            "type": "integer",
+            "exclusiveMinimum": 0
+        },
+
+        "list_of_characteristics": {
+            "description": "List of the nodes' characteristics. Nodes will present a value for some of these.",
+            "type":"array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "C_name": {"type": "string"},
+                    "C_description": {"type": "string"},
+                    "C_values": {"type": "string"}
+                },
+                "required": ["C_name"]
+            },
+            "minItems": 1
+            },
+
+        "tree": {
+            "description": "The actual tree. The first node is the root.",
+            "$ref": "#/definitions/node"
+        }
+
+    },
+
+    "definitions": {
+        "node": {
+            "type": "object",
+
+            "properties": {
+                "node_characteristics": {
+                    "type": "array",
+                    "minItems": 1
+                },
+                "node_children": {
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "minItems": 0,
+                            "maxItems": 0
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 8,
+                            "maxItems": 8,
+                            "items": {"$ref": "#/definitions/node"}
+                        }
+                    ]
+                }
+            },
+            "required": ["node_children", "node_characteristics"]
+        }
+    },
+
+    "if": {
+        "properties": {
+            "coordinate_system": {"const": "absolute"}
+        }
+    },
+    "then": {
+        "properties": {
+            "absolute_pose": {
+                "type": "object",
+                "properties": {
+                    "translation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                            },
+                            {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "orientation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            }
+                        ]
+
+                    }
+                },
+                "required": ["translation", "orientation"]
+            }
+        },
+        "required": ["absolute_pose"]
+    },
+    "else": {
+        "properties": {
+        "absolute_pose": false
+        }
+    },
+
+    "additionalProperties": false,
+    "required": ["localmap_id", "coordinate_system", "size", "octree", "list_of_characteristics"]
+}

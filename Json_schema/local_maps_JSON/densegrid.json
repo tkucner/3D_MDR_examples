@@ -1,0 +1,125 @@
+{
+    "$id": "https://github.com/effelam/JSON_3dMaps/blob/master/local_maps_JSON/densegrid.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "densegrid",    
+    "description": "Implementation of the local map type densegrid. A densegrid is a parallelepiped divided in equal voxels, which are described by the proper field.",
+    "type": "object",
+    
+    "properties":{
+        "localmap_id": {"type": "string"},
+        "time": {"description": "Time of creation of the map.", "type": "string", "format": "date-time"},
+        "map_description": {"type": "string"},
+        "coordinate_system": {"type": "string", "enum": ["absolute", "relative"]},
+        "absolute_pose": {"description": "Geo-referenced location of the local map. Required if coordinate_system is absolute, not required if coordinate_system is relative."},
+  
+        "resolution": {
+            "description": "Resolution (length of a single voxel’s edges) along the x, y, and z axes, expressed in meters.",
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "number", "exclusiveMinimum": 0}
+        },
+  
+        "size": {
+            "description": "Size of the dense grid, expressed as the number of voxels along the x, y, and z axes.",
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {"type": "integer", "exclusiveMinimum": 0}
+        },
+
+        "list_of_characteristics": {
+            "description": "List of the voxels' characteristics. Each voxel should present a value for each one of these.",
+            "type":"array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "C_name": {"type": "string"},
+                    "C_description": {"type": "string"},
+                    "C_values": {"type": "string"}        
+                },
+                "required": ["C_name"]
+            },
+            "minItems": 1
+        },
+        
+        "list_of_voxels": {
+            "description": "List of all the voxels. The first one is the voxel with local coordinate (0,0,0), the second (1,0,0), ... (size[0]-1,0,0), (0,1,0), ..., (size[0]-1,size[1]-1,0), (0,0,1), ..., (size[0]-1,size[1]-1,size[2]-1). Each voxel is a list of characteristics, described in the field characteristics.",
+            "type": "array",
+            "items": {"$ref": "#/definitions/densegrid_voxel"}
+        }
+    },
+
+    "definitions": {
+        "densegrid_voxel": {
+            "description": "A densegrid_voxel is an array of values, one for each characteristic reported in the list_of_characteristics field.",
+            "type": "array",
+            "minItems": 1
+        }
+    },
+
+    "if": {
+        "properties": {
+            "coordinate_system": {"const": "absolute"}
+        }
+    },
+    "then": {
+        "properties": {
+            "absolute_pose": {
+                "type": "object",
+                "properties": {
+                    "translation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                            },
+                            {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "orientation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            }
+                        ]
+
+                    }
+                },
+                "required": ["translation", "orientation"]
+            }
+        },
+        "required": ["absolute_pose"]
+    },
+    "else": {
+        "properties": {
+            "absolute_pose": false
+        }
+    },
+
+    "additionalProperties": false,
+    "required": ["localmap_id", "coordinate_system", "resolution", "size", "list_of_voxels", "list_of_characteristics"]
+}

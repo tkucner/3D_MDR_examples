@@ -1,0 +1,122 @@
+{
+    "$id": "https://github.com/effelam/JSON_3dMaps/blob/master/local_maps_JSON/pointcloud.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "pointcloud",    
+    "description": "Implementation of the local map type pointcloud. A pointcloud is a list of points, each one that has a coordinate and a list of characteristics.",
+    "type": "object",
+
+    "properties":{
+        "localmap_id": {"type": "string"},
+        "time": {"description": "Time of creation of the map.", "type": "string", "format": "date-time"},
+        "map_description": {"type": "string", "maxLength": 250},
+        "coordinate_system": {"type": "string", "enum": ["absolute", "relative"]},
+        "absolute_pose": {"description": "Geo-referenced location of the local map. Required if coordinate_system is absolute, not required if coordinate_system is relative."},
+        
+        "list_of_characteristics": {
+            "description": "List of the points' characteristics. Each node should present a value for each one of these.",
+            "type":"array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "C_name": {"type": "string"},
+                    "C_description": {"type": "string"},
+                    "C_values": {"type": "string"}        
+                },
+                "required": ["C_name"]
+            },
+            "minItems": 1
+        },
+
+        "list_of_points": {
+            "description": "List of all the points. Each point is a pair: the first element is its coordinates and the second one is a list of its characteristics as listed in the list_of_characteristic field.",
+            "type": "array",
+            "items": {"$ref": "#/definitions/point"}
+        }
+    
+    },
+
+    "definitions": {
+        "point": {
+            "description": "A point is a pair. The first element represents the coordinates (x,y,z) in the space and the second element is an array of values, one for each characteristic reported in the list_of_characteristics field.",
+            "type": "array",
+            "items": [
+                {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3
+                },
+                {
+                    "type": "array",
+                    "minItems": 1
+                }
+            ]
+        }
+    },
+
+
+    "if": {
+        "properties": {
+            "coordinate_system": {"const": "absolute"}
+        }
+    },
+    "then": {
+        "properties": {
+            "absolute_pose": {
+                "type": "object",
+                "properties": {
+                    "translation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                            },
+                            {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "orientation": {
+                        "type": "array",
+                        "items": [
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            },
+                            {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 360
+                            }
+                        ]
+
+                    }
+                },
+                "required": ["translation", "orientation"]
+            }
+        },
+        "required": ["absolute_pose"]
+    },
+    "else": {
+        "properties": {
+        "absolute_pose": false
+        }
+    },
+
+    "additionalProperties": false,
+    "required": ["localmap_id", "coordinate_system", "list_of_points", "list_of_characteristics"]
+}

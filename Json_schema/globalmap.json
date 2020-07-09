@@ -1,0 +1,70 @@
+{
+    "$id": "https://github.com/effelam/JSON_3dMaps/blob/master/globalmap.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+
+    "title": "globalMap",    
+    "description": "Implementation of the global map. A global map is a graph whose vertices are local maps and whose (directed) arcs represent the transformation between the coordinate systems of the two connected local maps.",
+    "type": "object",
+    
+    "properties":{
+        "globalmap_id": {"type": "string"},
+        "list_of_vertices": {
+            "description": "List of all the vertices. Each vertex is a local map, represented by a triple: its id, the type of local map, and the path where the map is stored.",
+            "type": "array",
+            "items": {"$ref": "#/definitions/vertex"}
+        },
+        "list_of_arcs": {
+            "description": "List of all the arcs. Each arc represents a transformation between two local maps.",
+            "type": "array",
+            "items": {"$ref": "#/definitions/transformation"}
+        }
+    },
+
+    "definitions": {
+        "vertex" :{
+            "type": "object",
+            "properties": {
+                "vertex_id": {"type": "string"},
+                "vertex_type": {
+                    "type": "string",
+                    "enum": ["densegrid", "octree", "pointcloud", "polygonmesh", "sparsegrid", "other"]
+                },
+                "vertex_path": {"type": "string"}
+            },
+            "required": ["vertex_id", "vertex_type"]
+        },
+
+        "transformation": {
+            "type": "object",
+
+            "properties": {
+                "transformation_id": {"type": "string"},
+                "head": {"type": "string"},
+                "tail": {"type": "string"},
+                "rotation": {
+                    "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "items": {"type": "number"}
+                },
+                "translation": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": {"type": "number"}
+                },
+                "uncertainty": {
+                    "description": "7x7 uncertainty matrix",
+                    "type": "array",
+                    "minItems": 28,
+                    "maxItems": 28,
+                    "items": {"type": "number"}
+                }
+            },
+            "required": ["transformation_id", "arc_head", "arc_tail"]
+        }
+    },
+
+    "additionalProperties": false,
+    "required": ["globalmap_id", "list_of_vertices", "list_of_arcs"]
+}
