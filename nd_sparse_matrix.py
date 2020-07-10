@@ -8,7 +8,7 @@ class NDSparseMatrix:
     def from_dense(self, matrix):
         inds = np.array(np.nonzero(matrix)).T
         for ind in inds:
-            self.addValue(tuple(ind), matrix[tuple(ind)])
+            self.addValue(tuple(map(int, ind)), matrix[tuple(ind)])
 
     def addValue(self, tuple, value):
         self.elements[tuple] = value

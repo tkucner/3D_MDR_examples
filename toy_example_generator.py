@@ -8,9 +8,10 @@ import numpy as np
 import helpers as he
 import json_helpers as jh
 import nd_sparse_matrix as sp
+import oct_tree as oc
 import visualisation as vis
 
-map_types = ['dense_grid', 'sparse_grid', 'oct_map', 'mesh', 'all']
+map_types = ['dense_grid', 'sparse_grid', 'oct_map', 'mesh', 'pc', 'all']
 output_types = ['json', 'plot', 'all']
 
 
@@ -114,13 +115,37 @@ def main():
         if args.output_type == 'json' or args.output_type == 'all':
             jh.save_dense_grid_as_jason(h.shape, h.flatten(), [1, 1, 1])
 
-    # sparse = compute_pseudo_sparse_grid(point_cloud, 1)
-    # tree = oc.OctTree(point_cloud, 20)
-    # tree.build_tree()
-    #
-    #
-    #
-    # vis.show_oct_tree(tree.tree)
+    if args.map_type == 'sparse_grid' or args.map_type == 'all':
+        sparse = compute_pseudo_sparse_grid(point_cloud, 1)
+        if args.output_type == 'plot' or args.output_type == 'all':
+            vis.show_pseudo_sparse_grid(sparse)
+        if args.output_type == 'json' or args.output_type == 'all':
+            jh.save_sparse_grid_as_jason(
+                [max([k[0] for k in sparse.elements.keys()]), max([k[1] for k in sparse.elements.keys()]),
+                 max([k[2] for k in sparse.elements.keys()])], [k + (v,) for k, v in sparse.elements.items()],
+                [1, 1, 1])
+
+    if args.map_type == 'pc' or args.map_type == 'all':
+        if args.output_type == 'plot' or args.output_type == 'all':
+            vis.show_pseudo_pointcloud(point_cloud)
+        if args.output_type == 'json' or args.output_type == 'all':
+            jh.save_point_cloud_as_jason(point_cloud)
+
+    if args.map_type == 'oct_map' or args.map_type == 'all':
+        tree = oc.OctTree(point_cloud, 20)
+        tree.build_tree()
+        if args.output_type == 'plot' or args.output_type == 'all':
+            vis.show_oct_tree(tree.tree)
+        if args.output_type == 'json' or args.output_type == 'all':
+            jh.save_oct_map_as_jason(tree.tree, [tree.corners['x_max'] - tree.corners['x_min'],
+                                                 tree.corners['y_max'] - tree.corners['y_min'],
+                                                 tree.corners['z_max'] - tree.corners['z_min']])
+
+    if args.map_type == "mesh" or args.map_type == 'all':
+        if args.output_type == 'plot' or args.output_type == 'all':
+            vis.show_pseudo_mesh(pseudo_walls)
+        if args.output_type == 'json' or args.output_type == 'all':
+            jh.save_mesh_as_json(pseudo_walls)
 
 
 if __name__ == "__main__":
