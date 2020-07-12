@@ -16,6 +16,12 @@ output_types = ['json', 'plot', 'all']
 
 
 def check_map_type(value):
+    """
+    Function checking if the map type is handled by the program.
+    :param value: the input string for the map type
+    :return: the input string
+    :raises ArgumentTyeError: if the type is not handled by the program
+    """
     value = value.lower()
     if value not in map_types:
         raise argparse.ArgumentTypeError("%s is an invalid map type" % value)
@@ -23,6 +29,12 @@ def check_map_type(value):
 
 
 def check_output_type(value):
+    """
+    Function checking if the output type is handled by the program.
+        :param value: the input string for the output type
+        :return: the input string
+        :raises ArgumentTyeError: if the type is not handled by the program
+        """
     value = value.lower()
     if value not in output_types:
         raise argparse.ArgumentTypeError("%s is an invalid output type" % value)
@@ -30,6 +42,11 @@ def check_output_type(value):
 
 
 def generate_parallelograms(file):
+    """
+Function generating paralleograms based on the input file.
+    :param file: path to the file to read
+    :return: list of lists of vertices
+    """
     with open(file, newline='') as csvfile:
         input_vertices = list(csv.reader(csvfile, quoting=csv.QUOTE_NONNUMERIC))
 
@@ -46,8 +63,14 @@ def generate_parallelograms(file):
 
 
 def generate_pseudo_measurement_points(para, num_points, noise_max):
+    """
+    Function generates pseudo measurement points on the parallelogram.
+    :param para: ordered list with the vertices of the parallelogram
+    :param num_points: number of measurements points on the wall
+    :param noise_max: max noise perpendicular to the parallelogram surface
+    :return: list of points
+    """
     points = []
-    # get the normal of the parallelogram
     v1 = [x1 - x2 for (x1, x2) in zip(para['a'], para['b'])]
     v2 = [x1 - x2 for (x1, x2) in zip(para['c'], para['b'])]
     norm = [v1[1] * v2[2] - v1[2] * v2[1],
@@ -70,6 +93,12 @@ def generate_pseudo_measurement_points(para, num_points, noise_max):
 
 
 def compute_pseudo_dens_grid(points, resolution):
+    """
+    Function computing dense grid based on the input list of points.
+    :param points: list of measurments points
+    :param resolution: size of the voxel (it is assumed it is a cube)
+    :return: 3D matrix with number of points per voxel and the edges of the voxels
+    """
     cube = he.compute_max_cube(points)
 
     points_np = np.array(points)
@@ -81,6 +110,12 @@ def compute_pseudo_dens_grid(points, resolution):
 
 
 def compute_pseudo_sparse_grid(points, resolution):
+    """
+    Function computing the sparse grid representation based on the input points.
+    :param points: list of measurments points
+    :param resolution: size of the voxel (it is assumed it is a cube)
+    :return: returs object of type NDSparseMatrix
+    """
     h, edges = compute_pseudo_dens_grid(points, resolution)
     sparse_grid = sp.NDSparseMatrix()
     sparse_grid.from_dense(h)

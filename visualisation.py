@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+import helpers as he
+
+
 def expand_coordinates(indices):
     x, y, z = indices
     x[1::2, :, :] += 1
@@ -83,10 +86,10 @@ def show_pseudo_measurements(pseudo_walls):
     plt.show()
 
 
-def show_pseudo_dense_grid(H):
+def show_pseudo_dense_grid(h):
     ax = make_ax()
 
-    alpha = np.expand_dims(H / H.max(), axis=3)
+    alpha = np.expand_dims(h / h.max(), axis=3)
     colors = np.array([[[[0.12, 0.46, 0.7]] * alpha.shape[2]] * alpha.shape[1]] * alpha.shape[0])
     colors = np.append(colors, alpha, axis=3)
     colors = np.apply_along_axis(to_hex_wrapper, 3, colors)
@@ -113,7 +116,7 @@ def show_pseudo_pointcloud(points):
     plt.show()
 
 
-def show_pseudo_mesh(mesh, color="r"):
+def show_pseudo_mesh(mesh):
     ax = make_ax()
 
     x_min = float('Inf')
@@ -125,10 +128,7 @@ def show_pseudo_mesh(mesh, color="r"):
 
     verts = []
     for pw in mesh:
-        x = [pw['par']['a'][0], pw['par']['b'][0], pw['par']['c'][0], pw['par']['d'][0]]
-        y = [pw['par']['a'][1], pw['par']['b'][1], pw['par']['c'][1], pw['par']['d'][1]]
-        z = [pw['par']['a'][2], pw['par']['b'][2], pw['par']['c'][2], pw['par']['d'][2]]
-
+        x, y, z = he.get_points_from_mesh(pw)
         x_min = min(x_min, min(x))
         x_max = max(x_max, max(x))
         y_min = min(y_min, min(y))

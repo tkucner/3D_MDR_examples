@@ -25,6 +25,12 @@ def divide_cube(cube):
 
 
 def in_cube(points, cube):
+    """
+
+    :param points:
+    :param cube:
+    :return:
+    """
     x = np.array([item[0] for item in points])
     y = np.array([item[1] for item in points])
     z = np.array([item[2] for item in points])
@@ -51,3 +57,10 @@ def compute_max_cube(points):
     cube = {'x_max': cm[0] + max_dim, 'x_min': cm[0] - max_dim, 'y_max': cm[1] + max_dim, 'y_min': cm[1] - max_dim,
             'z_max': cm[2] + max_dim, 'z_min': cm[2] - max_dim}
     return cube
+
+
+def get_points_from_mesh(pw):
+    x = [pw['par']['a'][0], pw['par']['b'][0], pw['par']['c'][0], pw['par']['d'][0]]
+    y = [pw['par']['a'][1], pw['par']['b'][1], pw['par']['c'][1], pw['par']['d'][1]]
+    z = [pw['par']['a'][2], pw['par']['b'][2], pw['par']['c'][2], pw['par']['d'][2]]
+    return x, y, z
